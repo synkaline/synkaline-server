@@ -7,7 +7,9 @@ export default new HttpEvent({
     method: HttpEvent.types.GET,
     // @ts-ignore
     async callback(req, res, _next) {
-        const videoUrl = 'https://www.youtube.com/watch?v=iVKEcznDqDg'
+        const ID = req.query.id
+        
+        const videoUrl = `https://www.youtube.com/watch?v=${ID}`
 
         // Validate the YouTube URL
         if (!videoUrl || !ytdl.validateURL(videoUrl)) {

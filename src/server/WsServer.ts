@@ -9,7 +9,8 @@ import { Message } from "@/structures/Message";
 import { Logger } from "@/utils/Logger";
 
 import type { connection } from 'websocket';
-
+import { Application } from 'express';
+import { Queue } from '@/structures/Queue';
 
 
 
@@ -20,12 +21,16 @@ class WsServer extends server {
     // websocket reads the functions to execute on a specific message from here
     events: Map<Message['type'], WsEvent>;
     clients: Map<string, connection>;
+    queue: Queue;
 
     constructor(httpServer: ReturnType<typeof createServer>) {
         if (!httpServer) throw new Error('No http server found');
+        // @ts-ignore
         super({ httpServer: httpServer });
 
         this.events = new Map();
+        this.clients = new Map();
+        this.queue = null
 
     }
 
@@ -48,6 +53,11 @@ class WsServer extends server {
 
     }
 
+
+    setQueue(queue: Queue) {
+        this.queue = queue
+    }
+
     
 
 
@@ -66,7 +76,7 @@ class WsServer extends server {
 
         this.on('close', (connection, _number, _description) => {
 
-            Logger.log(colors.blue('[WS_SERVER]'), '[WS_CONNECTION_CLOSE]', '-> new user join', connection.id);
+            Logger.log(colors.blue('[WS_SERVER]'), '[WS_CONNECTION_CLOSE]', '-> user left', connection.id);
 
             this.clients.delete(connection.id)
         })

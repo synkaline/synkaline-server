@@ -16,11 +16,13 @@ class HttpServer {
     // { GET: { 'routepath': Event } }
     events: Map<HttpEvent['method'], Map<string, HttpEvent>>
     PORT: number;
+    server: ReturnType<typeof createServer>;
 
     constructor(PORT: number = 3000) {
         this.PORT = PORT;
         this.events = new Map();
         this.WsServer = null;
+        this.server = null
 
         for (let i = 0; i < HttpEvent.getTypeString().length; i++)
             this.events.set(i, new Map())
@@ -69,7 +71,8 @@ class HttpServer {
         }
 
  
-        this.app.listen(this.PORT, () => Logger.log(`[HTTP_SERVER] Listening on PORT ${this.PORT}`));
+        this.server = createServer(this.app);
+        this.server.listen(this.PORT, () => Logger.log(`[HTTP_SERVER] Listening on PORT ${this.PORT}`));
     }
 }
 
