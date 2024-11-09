@@ -3,6 +3,7 @@ import { Logger } from '@/utils/Logger'
 import ytdl from '@distube/ytdl-core';
 import { Queue, QueueItem } from '@/structures/Queue';
 import WsServer from './server/WsServer';
+import { Message } from './structures/Message';
 
 Logger.DEV = true;
 
@@ -31,8 +32,8 @@ declare module 'websocket' {
     let queue = new Queue()
 
     let links = [
-        "https://www.youtube.com/watch?v=dYaHTKlxL5s",
         "https://www.youtube.com/watch?v=J88v6SomV0k",
+        "https://www.youtube.com/watch?v=dYaHTKlxL5s",
         "https://www.youtube.com/watch?v=6yrdS4tIP9U",
 
     ]
@@ -48,15 +49,23 @@ declare module 'websocket' {
         queue.addItem({
             info,
             format,
-            startTime: Date.now() + previous
+            startTime: Date.now() + previous + 4000
         })
 
     }
 
 
+    console.log(queue.items.map(x => ({ name: x.info.videoDetails.title, duration: (parseInt(x.info.videoDetails.lengthSeconds) * 1000), start: x.startTime })))
+
+
     wsserver.setQueue(queue)
     wsserver.queue.on('newtrack', (item: QueueItem) => {
-        console.log(item.info.videoDetails.title)
+        for (const client of wsserver.clients.values()) {
+            client.send(new Message({
+                type: Message.types.NEW_TRACK,
+                data: [{ id: item.info.videoDetails.videoId }]
+            }).encode())
+        }
     })
 
 
