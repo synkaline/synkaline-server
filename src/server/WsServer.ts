@@ -1,10 +1,16 @@
 import fs from 'fs';
 import { server } from "websocket";
 import { createServer } from 'http'
+import colors from 'colors/safe';
+import { v4 as uuidv4 } from 'uuid';
+
 import { WsEvent } from "@/structures/events"
 import { Message } from "@/structures/Message";
 import { Logger } from "@/utils/Logger";
-import colors from 'colors/safe';
+
+import type { connection } from 'websocket';
+
+
 
 
 class WsServer extends server {
@@ -13,6 +19,7 @@ class WsServer extends server {
     // this map consists of all the events located under /events folder
     // websocket reads the functions to execute on a specific message from here
     events: Map<Message['type'], WsEvent>;
+    clients: Map<string, connection>;
 
     constructor(httpServer: ReturnType<typeof createServer>) {
         if (!httpServer) throw new Error('No http server found');
@@ -45,20 +52,23 @@ class WsServer extends server {
 
 
     start() {
-        this.on('connect', (_connection) => {
+        this.on('connect', (connection) => {
 
+            connection.id = uuidv4()
+            Logger.log(colors.blue('[WS_SERVER]'), '[WS_CONNECTION_OPEN]', '-> new user join', connection.id);
 
-            Logger.log(colors.blue('[WS_SERVER]'), '[WS_CONNECTION]', '-> new user join');
-
+            this.clients.set(connection.id, connection)
 
         });
 
 
 
+
         this.on('close', (connection, _number, _description) => {
 
+            Logger.log(colors.blue('[WS_SERVER]'), '[WS_CONNECTION_CLOSE]', '-> new user join', connection.id);
 
-
+            this.clients.delete(connection.id)
         })
 
 

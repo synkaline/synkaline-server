@@ -14,7 +14,7 @@ enum HttpTypes {
 interface Arguments {
     route: string;
     method?: HttpTypes;
-    callback: (this: HttpServer, ...args: Parameters<RequestHandler>) => ReturnType<RequestHandler>;
+    callback: (this: HttpServer, ...args: Parameters<RequestHandler>) => any;
 }
 
 class HttpEvent extends BaseEvent {

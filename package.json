@@ -17,7 +17,9 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "msgpack-lite": "^0.1.26",
+    "nodemon": "^3.1.7",
     "tsconfig-paths": "^4.2.0",
+    "uuid": "^11.0.2",
     "uws": "^200.0.0",
     "websocket": "^1.0.35"
   },
