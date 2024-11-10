@@ -45,41 +45,38 @@ declare module 'websocket' {
     for (let i = 0; i < links.length; i++) {
         let info = await ytdl.getInfo(links[i])
         let format = ytdl.chooseFormat(info.formats, { quality: 'highestaudio' })
-        let previous = i == 0 ? 0 : parseInt(queue.items[i - 1].info.videoDetails.lengthSeconds) * 1000
+        let [previous, previousDuration] = i == 0 ? [Date.now(), 0] : [queue.items[i - 1].startTime, parseInt(queue.items[i - 1].info.videoDetails.lengthSeconds) * 1000]
         queue.addItem({
             info,
             format,
-            startTime: Date.now() + previous + 4000
+            startTime: previous + previousDuration
         })
 
     }
 
 
-    console.log(queue.items.map(x => ({ name: x.info.videoDetails.title, duration: (parseInt(x.info.videoDetails.lengthSeconds) * 1000), start: x.startTime })))
+    console.log(queue.items.map(x => ({ name: x.info.videoDetails.title, duration: (parseInt(x.info.videoDetails.lengthSeconds) * 1000), start: x.startTime, date: new Date(x.startTime).toLocaleTimeString() })))
 
-
+    const LOAD_DELAY = 2000;
     wsserver.setQueue(queue)
     wsserver.queue.on('newtrack', (item: QueueItem) => {
+        console.log('new track', new Date(item.startTime).toLocaleTimeString(), new Date(Date.now()).toLocaleTimeString())
         for (const client of wsserver.clients.values()) {
             client.send(new Message({
                 type: Message.types.NEW_TRACK,
                 data: [{ id: item.info.videoDetails.videoId }]
             }).encode())
         }
+
+        let duration = parseInt(wsserver.queue.items[wsserver.queue.current].info.videoDetails.lengthSeconds);
+        let durationMs = duration * 1000;
+        wsserver.queue.items[wsserver.queue.current].startTime = Date.now();
+
+        console.log('new track', new Date(item.startTime).toLocaleTimeString(), new Date(Date.now()).toLocaleTimeString())
+
+        setTimeout(wsserver.queue.tick.bind(wsserver.queue), durationMs)
     })
 
 
     wsserver.queue?.start()
-
-    // // Date.now() - item.starttime
-
-
-
-
-
-    // queue.on('newtrack', (t: QueueItem) => console.log(t.info.videoDetails.title))
-
-    // queue.start();
-
-    // console.log(ytdl.chooseFormat(info.formats, { quality: 'highestaudio' }))
 })()

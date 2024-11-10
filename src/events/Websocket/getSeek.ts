@@ -6,7 +6,6 @@ export default new WsEvent({
     async callback(ws, _message) {
         console.log('get seek')
         let curr = Date.now()
-        let queue = this.queue
 
         let seek = curr - this.queue.items[this.queue.current].startTime
 

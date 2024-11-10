@@ -29,14 +29,14 @@ class Queue extends EventEmitter{
 
         if (this.current > this.items.length - 1) {
             Logger.log('[QUEUE]', 'queue exhausted, restart queue')
-            // this.current = 0
+            this.current = 0
             return
         }
 
         this.emit('newtrack', (this.items[this.current]))
 
-        let duration = parseInt(this.items[this.current].info.videoDetails.lengthSeconds) * 1000
-        setTimeout(this.tick.bind(this), duration);
+        // let duration = parseInt(this.items[this.current].info.videoDetails.lengthSeconds) * 1000
+        // setTimeout(this.tick.bind(this), duration);
     }
 
     addItem(item: QueueItem) {
