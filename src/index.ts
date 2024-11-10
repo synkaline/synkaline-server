@@ -54,6 +54,7 @@ declare module 'websocket' {
 
     console.log(queue.items.map(x => ({ name: x.info.videoDetails.title, duration: (parseInt(x.info.videoDetails.lengthSeconds) * 1000), start: x.startTime, date: new Date(x.startTime).toLocaleTimeString() })))
 
+    // 5 second delay
     const LOAD_DELAY = 5000;
     wsserver.setQueue(queue)
     wsserver.queue.on('newtrack', (item: QueueItem) => {
@@ -65,12 +66,17 @@ declare module 'websocket' {
             }).encode())
         }
 
+        // set playback time of current track to current time once newtrack packet has been sent to all users
         let duration = parseInt(wsserver.queue.items[wsserver.queue.current].info.videoDetails.lengthSeconds);
         let durationMs = duration * 1000;
+        // add a load delay factor to incorporate poor network connection of users
         wsserver.queue.items[wsserver.queue.current].startTime = Date.now() + LOAD_DELAY;
 
         console.log('new track', new Date(item.startTime).toLocaleTimeString(), new Date(Date.now()).toLocaleTimeString())
 
+        // start tick after load delay
+        // remember this only starts the duration countdown, the track is the same even without the timout starting
+        // when user requests before this timeout starts they receive negative seek value, which is fine and handled at client side
         setTimeout(() => {
             setTimeout(wsserver.queue.tick.bind(wsserver.queue), durationMs)
         }, LOAD_DELAY);
