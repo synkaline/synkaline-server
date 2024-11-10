@@ -38,9 +38,6 @@ declare module 'websocket' {
 
     ]
 
-    let info = await ytdl.getInfo("https://youtu.be/nxx6-GPfGCc")
-    let format = ytdl.chooseFormat(info.formats, { quality: 'highestaudio' })
-    console.log(format)
 
     for (let i = 0; i < links.length; i++) {
         let info = await ytdl.getInfo(links[i])
@@ -57,7 +54,7 @@ declare module 'websocket' {
 
     console.log(queue.items.map(x => ({ name: x.info.videoDetails.title, duration: (parseInt(x.info.videoDetails.lengthSeconds) * 1000), start: x.startTime, date: new Date(x.startTime).toLocaleTimeString() })))
 
-    const LOAD_DELAY = 2000;
+    const LOAD_DELAY = 5000;
     wsserver.setQueue(queue)
     wsserver.queue.on('newtrack', (item: QueueItem) => {
         console.log('new track', new Date(item.startTime).toLocaleTimeString(), new Date(Date.now()).toLocaleTimeString())
@@ -70,11 +67,13 @@ declare module 'websocket' {
 
         let duration = parseInt(wsserver.queue.items[wsserver.queue.current].info.videoDetails.lengthSeconds);
         let durationMs = duration * 1000;
-        wsserver.queue.items[wsserver.queue.current].startTime = Date.now();
+        wsserver.queue.items[wsserver.queue.current].startTime = Date.now() + LOAD_DELAY;
 
         console.log('new track', new Date(item.startTime).toLocaleTimeString(), new Date(Date.now()).toLocaleTimeString())
 
-        setTimeout(wsserver.queue.tick.bind(wsserver.queue), durationMs)
+        setTimeout(() => {
+            setTimeout(wsserver.queue.tick.bind(wsserver.queue), durationMs)
+        }, LOAD_DELAY);
     })
 
 
